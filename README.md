@@ -1,0 +1,1 @@
+miniredis - a toy clone of Redis in Ruby
