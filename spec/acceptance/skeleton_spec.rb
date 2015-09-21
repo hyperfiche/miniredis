@@ -1,15 +1,17 @@
 require 'redis'
 
+require 'miniredis/server'
+
 TEST_PORT = 6380
 
 # RSpec.configure do |c|
 # 	c.treat_symbols_as_metadata_keys_with_true_values = true
 # end
 
-describe 'miniredis', :acceptance do
+describe 'Miniredis', :acceptance do
 	it 'responds to ping' do
 		with_server do
-			expect(client.ping).to eq("OK")
+			expect(client.ping).to eq("PONG")
 		end
 	end
 
@@ -18,8 +20,11 @@ describe 'miniredis', :acceptance do
 	end
 
 	def with_server
+		client.flushall
+		yield
+		return
 		server_thread = Thread.new do
-			server = miniredis::Server.new(TEST_PORT)
+			server = Miniredis::Server.new(TEST_PORT)
 			server.listen
 		end
 
