@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    redis (3.2.1)
+    rspec-core (3.3.2)
+      rspec-support (~> 3.3.0)
+    rspec-support (3.3.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  redis
+  rspec-core
+
+BUNDLED WITH
+   1.10.6
