@@ -1,12 +1,4 @@
-require 'redis'
-
-require 'miniredis/server'
-
-TEST_PORT = 6380
-
-# RSpec.configure do |c|
-# 	c.treat_symbols_as_metadata_keys_with_true_values = true
-# end
+require 'spec_helper'
 
 describe 'Miniredis', :acceptance do
 	it 'responds to ping' do
@@ -30,6 +22,14 @@ describe 'Miniredis', :acceptance do
 		with_server do
 			expect(client.echo("hello\nthere")).to eq("hello\nthere")
 		end
+	end
+
+	it 'gets and sets values' do
+		with_server do
+			expect(client.get("abc")).to eq(nil)
+			expect(client.set("abc", "123")).to eq("OK")
+			expect(client.get("abc")).to eq("123")
+		end		
 	end
 
 	def client
