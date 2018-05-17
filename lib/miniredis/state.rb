@@ -16,8 +16,10 @@ module Miniredis
 	end
 
 	class State
-		def initialize
+		def initialize(clock)
 			@data = {}
+			@expires = {}
+			@clock = clock
 		end
 
 		def self.valid_command?(cmd)
@@ -33,6 +35,15 @@ module Miniredis
 			end
 
 			public_send *cmd
+		end
+
+		def expire(key, value)
+			if get(key)
+				expires[key] = clock.now + value.to_i
+				1
+			else
+				0
+			end
 		end
 
 		def set(*args)
@@ -52,7 +63,15 @@ module Miniredis
 		end
 
 		def get(key)
+			expiry = expires[key]
+			del(key) if expiry && expiry <= clock.now
+
 			data[key]
+		end
+
+		def del(key)
+			expires.delete(key)
+			data.delete(key)
 		end
 
 		def hset(hash, key, value)
@@ -62,11 +81,13 @@ module Miniredis
 		end
 
 		def hget(hash, key)
-			data[hash][key]
+			value = get(hash)
+			value[key] if value
 		end
 
 		def hmget(hash, *keys)
-			existing = data.fetch(hash, {})
+			existing = get(hash) || {}
+
 			if existing.is_a?(Hash)
 				existing.values_at(*keys)
 			else
@@ -75,13 +96,25 @@ module Miniredis
 		end
 
 		def hincrby(hash, key, amount)
-			existing = data[hash][key]
-			data[hash][key] = existing.to_i + amount.to_i
+			value = get(hash)
+
+			if value
+				existing = value[key]
+			 	value[key] = existing.to_i + amount.to_i
+			end
+		end
+
+		def exists(key)
+			if data[key]
+				1
+			else
+				0
+			end
 		end
 
 		private
 
-		attr_reader :data
+		attr_reader :data, :clock, :expires
 
 	end
 end

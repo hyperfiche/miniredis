@@ -5,10 +5,21 @@ require 'miniredis/state'
 
 module Miniredis
 	class Server
+
+		class Clock
+			def now
+				Time.now.to_f
+			end
+
+			def sleep(x)
+				::Kernel.sleep x
+			end
+		end
+
 		def initialize(port)
 			@port = port
 			@shutdown_pipe = IO.pipe
-			@state = State.new
+			@state = State.new(Clock.new)
 		end
 
 		def shutdown
